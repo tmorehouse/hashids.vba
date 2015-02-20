@@ -152,7 +152,7 @@ End Function
 '  hashid (string)
 '===================================================================
 Public Function EncodeHex(hexStr As String)
-    Dim ret As String
+    Dim tmpHex As String
     Dim i As Integer
     Dim nums As Variant
                 
@@ -167,12 +167,15 @@ Public Function EncodeHex(hexStr As String)
     i = 0
     While Len(hexStr) > 0
         ReDim Preserve nums(i)
-        nums = CLng("&H1" & Left(hexStr, 11))
+        'VBA only handles 8 hex chars max, so we break it into two parts
+        tmpHex = Left("00000000000" & Left(hexStr, 11), 11)
+        nums(i) = (CLng("&H" & Left(tmpHex, 7)) * 65536) + CLng("&H" & Right(tmpHex, 4))
+        hexStr = Mid(hexStr, 12)
         i = i + 1
     Wend
     
     If i = 0 Then
-        ' empty array
+        ' empty string
         EncodeHex = ""
     Else
         EncodeHex = P_Encode(nums)
