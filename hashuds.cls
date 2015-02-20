@@ -31,6 +31,7 @@ Private Const c_minHashLength As Integer = 0
 Private Const c_seps As String = "cfhistuCFHISTU"
 Private Const c_alphabet As String = _
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+Private Const c_hex As String = "0123456789abcdefABCDEF"
 
 '===================================================================
 ' Error Codes
@@ -97,7 +98,12 @@ Private Property Let Alphabet(ByVal alpha As String)
 End Property
 
 '===================================================================
+' obj. Params(salt, minHashLength, alphabet)
 ' Allow initialization with optional salt. min hash len and alphabet
+' Parameters:
+'  salt (optional String) Salt String
+'  minHashLen (optional integer) Minimum Hash Lenght
+'  alphabetStr (optional, string) uniquer alphabet string
 '===================================================================
 Public Sub Params( _
         Optional saltStr As Variant = "", _
@@ -107,7 +113,6 @@ Public Sub Params( _
     ' Now compute the guars and seps
     P_Init Nz(saltStr, ""), Nz(minHashLen, 0), Nz(alphabetStr, c_alphabet)
 End Sub
-
 
 '===================================================================
 ' obj.Encode(nums)
@@ -135,6 +140,42 @@ Public Function Encode(ParamArray nums() As Variant)
         Encode = ""
     Else
         Encode = P_Encode(nums)
+    End If
+    
+End Function
+
+'===================================================================
+' obj.EncodeHex(hexstring)
+'  Parameters:
+'   hex value as a string (no leading &H)
+' Returns
+'  hashid (string)
+'===================================================================
+Public Function EncodeHex(hexStr As String)
+    Dim ret As String
+    Dim i As Integer
+    Dim nums As Variant
+                
+    For i = 1 To Len(hexStr) Step 1
+        c = Mid(hexStr, i, 1)
+        If InStr(1, c_hex, Mid(hexStr, i, 1), vbBinaryCompare) < 1 Then
+            EncodeHex = ""
+            Exit Function
+        End If
+    Next
+        
+    i = 0
+    While Len(hexStr) > 0
+        ReDim Preserve nums(i)
+        nums = CLng("&H1" & Left(hexStr, 11))
+        i = i + 1
+    Wend
+    
+    If i = 0 Then
+        ' empty array
+        EncodeHex = ""
+    Else
+        EncodeHex = P_Encode(nums)
     End If
     
 End Function
@@ -205,7 +246,7 @@ Private Function P_Encode(ByVal nums As Variant) As String
 End Function
 
 '===================================================================
-' hash(num)
+' P_Hash(num)
 '  Parameters:
 '   num (long) number to hash
 ' Returns
@@ -229,7 +270,7 @@ Private Function P_Hash( _
 End Function
 
 '===================================================================
-' consisentShuffle(alphabet, salt)
+' P_ConsisentShuffle(alphabet, salt)
 ' Parameters:
 '  alphaStr (string) Alphabet to Shuffle
 '  salt (string) Salt to see teh shuffle
