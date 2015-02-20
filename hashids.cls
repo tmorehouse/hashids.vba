@@ -122,7 +122,7 @@ End Sub
 ' Returns
 '  hashid (string)
 '===================================================================
-Public Function Encode(ParamArray nums() As Variant)
+Public Function Encode(ParamArray nums() As Variant) As String
     Dim ret As String
     Dim i As Integer, j As Integer, l As Integer
     Dim num As Variant
@@ -178,6 +178,13 @@ Public Function EncodeHex(hexStr As String)
         EncodeHex = P_Encode(nums)
     End If
     
+End Function
+
+'===================================================================
+' obj.Encrypte  Alias of Encode
+'===================================================================
+Public Function Encrypt(ParamArray nums() As Variant) As String
+    Encrype = Encode(nums)
 End Function
 
 '===================================================================
