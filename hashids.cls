@@ -151,7 +151,7 @@ End Function
 ' Returns
 '  hashid (string)
 '===================================================================
-Public Function EncodeHex(hexStr As String)
+Public Function EncodeHex(ByVal hexStr As String)
     Dim tmpHex As String
     Dim i As Integer
     Dim nums As Variant
