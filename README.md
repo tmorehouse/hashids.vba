@@ -1,6 +1,8 @@
 # hashids.vba
 Hashids, ported for VBA (http://www.hashids.org)
 
+**Note:** The decoding functions have not been fully tested yet.
+
 # NAME
 
 Hashids - generate short hashes from numbers
@@ -20,7 +22,7 @@ Hashids - generate short hashes from numbers
     numbers = hid.Decode('laHquq')  ' (1, 2, 3)
 
     ' or an Array
-    Dim arr(3) as variant
+    Dim arr(3) as Variant
     arr(0) = 1
     arr(1) = 2
     arr(2) = 3
@@ -44,7 +46,7 @@ This implementation is also compatible with the v0.3.x hashids.js API.
 
 # METHODS
 
-- `set hid = New Hashids()`
+- `set hid = New Hashids`
 
     Make a new Hashids object.  This constructor does not accept any options
 
