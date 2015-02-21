@@ -106,6 +106,8 @@ This implementation is also compatible with the v0.3.x hashids.js API.
 
 # LICENSE
 
+MIT License. See the `LICENSE` file. You can use Hashids in open source projects and commercial products.
+
 Batteries not included, some assembly required, not 
 suitable for children under the age of 6, slippery when wet, bridge freezes
 before road, do not use while consuming alcohol, use at your own risk.
