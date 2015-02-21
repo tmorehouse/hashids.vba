@@ -10,7 +10,7 @@ Hashids - generate short hashes from numbers
 # SYNOPSIS
 
     Dim hid As hashids
-    Set hid = new Hashids
+    Set hid = New Hashids
     hid.Params("this is my salt")
 
     ' encrypt a single number
