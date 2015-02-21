@@ -12,15 +12,6 @@ Option Explicit
 Option Base 0
 
 '===================================================================
-' Private variables
-'===================================================================
-Private p_alphabet As String
-Private p_salt As String
-Private p_seps As String
-Private p_guards As String
-Private p_minHashLength As Integer
-
-'===================================================================
 ' Constants
 '===================================================================
 Private Const c_version = "1.0.0"
@@ -34,14 +25,21 @@ Private Const c_alphabet As String = _
 Private Const c_hex As String = "0123456789abcdefABCDEF"
 
 '===================================================================
+' Private variables
+'===================================================================
+Private p_alphabet As String
+Private p_salt As String
+Private p_seps As String
+Private p_guards As String
+Private p_minHashLength As Integer
+
+'===================================================================
 ' Error Codes
 '===================================================================
 Public Enum HashidsErr
     hidAlphaShort = vbObjectError + 1000
     hidAlphaSpace = vbObjectError + 1001
     hidNonInteger = vbObjectError + 1002
-    hidNonHex = vbObjectError + 1003
-    hidErrDecode = vbObjectError + 1004
 End Enum
 
 '===================================================================
@@ -98,12 +96,7 @@ Private Property Let Alphabet(ByVal alpha As String)
 End Property
 
 '===================================================================
-' obj. Params(salt, minHashLength, alphabet)
 ' Allow initialization with optional salt. min hash len and alphabet
-' Parameters:
-'  salt (optional String) Salt String
-'  minHashLen (optional integer) Minimum Hash Lenght
-'  alphabetStr (optional, string) uniquer alphabet string
 '===================================================================
 Public Sub Params( _
         Optional saltStr As Variant = "", _
@@ -114,6 +107,7 @@ Public Sub Params( _
     P_Init Nz(saltStr, ""), Nz(minHashLen, 0), Nz(alphabetStr, c_alphabet)
 End Sub
 
+
 '===================================================================
 ' obj.Encode(nums)
 '  Parameters:
@@ -122,7 +116,7 @@ End Sub
 ' Returns
 '  hashid (string)
 '===================================================================
-Public Function Encode(ParamArray nums() As Variant) As String
+Public Function Encode(ParamArray nums() As Variant)
     Dim ret As String
     Dim i As Integer, j As Integer, l As Integer
     Dim num As Variant
@@ -145,9 +139,9 @@ Public Function Encode(ParamArray nums() As Variant) As String
 End Function
 
 '===================================================================
-' obj.EncodeHex(hexstring)
+' obj.EncodeHex(nums)
 '  Parameters:
-'   hex value as a string (no leading &H)
+'   hex value as a string
 ' Returns
 '  hashid (string)
 '===================================================================
@@ -155,7 +149,7 @@ Public Function EncodeHex(ByVal hexStr As String)
     Dim tmpHex As String
     Dim i As Integer
     Dim nums As Variant
-                
+
     For i = 1 To Len(hexStr) Step 1
         c = Mid(hexStr, i, 1)
         If InStr(1, c_hex, Mid(hexStr, i, 1), vbBinaryCompare) < 1 Then
@@ -175,7 +169,7 @@ Public Function EncodeHex(ByVal hexStr As String)
     Wend
     
     If i = 0 Then
-        ' empty string
+        ' empty strig
         EncodeHex = ""
     Else
         EncodeHex = P_Encode(nums)
@@ -184,10 +178,62 @@ Public Function EncodeHex(ByVal hexStr As String)
 End Function
 
 '===================================================================
-' obj.Encrypte  Alias of Encode
+' obj.Decode(hashStr)
+' Params:
+'   hasStr (string)
+'   alphaStr (string)
+' Returns
+'   Decoded number (if only 1 num) or array of numbers
+'===================================================================
+Public Function Decode(ByVal hashStr As String) As Variant
+    
+    If Nz(hasStr, "") = "" Then
+        Decode = vbNull
+    End If
+
+    Decode = P_Decode(hasStr, Me.Alphabet)
+    
+End Function
+
+'===================================================================
+' obj.DecodeHex(hashStr)
+' Returns:
+'   hex String
+'===================================================================
+Public Function DecodeHex(ByVal hashStr As String) As Variant
+    Dim nums As Variant
+    Dim num As Long, a As Long, b As Long
+    Dim hexStr As String
+    
+    If Nz(hasStr, "") = "" Then
+        Decode = vbNull
+    End If
+    
+    nums = P_Decode(hashStr, Me.Alphabet)
+    hexStr = ""
+    For Each num In nums
+        'VBA only handles 8 hex chars max
+        b = Hex(Int(num / 65536))
+        a = Hex(num - (b * 65536))
+        hexStr = hextStr & Mid(b, 2) & a
+    Next num
+    
+    DecodeHex = hexStr
+
+End Function
+
+'===================================================================
+' obj.Encrypt  Alias of Encode
 '===================================================================
 Public Function Encrypt(ParamArray nums() As Variant) As String
-    Encrype = Encode(nums)
+    Encrypt = Encode(nums)
+End Function
+
+'===================================================================
+' obj.Decrypt  Alias of Decode
+'===================================================================
+Public Function Decrypt(hashStr As String) As Variant
+    Decrypt = Decode(hashStr)
 End Function
 
 '===================================================================
@@ -256,6 +302,66 @@ Private Function P_Encode(ByVal nums As Variant) As String
 End Function
 
 '===================================================================
+' P_Decode
+' Params:
+'   hasStr (string)
+'   alphaStr (string)
+' Returns
+'   Decoded number (if only 1 num) or array of numbers
+'===================================================================
+Private Function P_Decode( _
+        ByVal hashStr As String, _
+        ByVal alphaStr As String) As Variant
+    Dim nums As Variant, hashArray As Variant
+    Dim i As Integer, l As Integer
+    Dim lottery As String, subHash As String, buffer As String
+    Dim c As String
+
+    For i = 1 To leng(Me.Guards)
+        c = Mid(Me.Guards, i, 1)
+        hashStr = Replace(hashStr, c, " ", 1, -1, vbBinaryCompare)
+    Next
+    hashArray = Split(hashStr, " ", -1, vbBinaryCompare)
+    
+    i = 0
+    l = UBound(hashArray) - LBound(hashArray) + 1
+    If l = 3 Or l = 2 Then
+        i = 1
+    End If
+    hashStr = Nz(hashArray(LBound(hashArray) + i), "")
+    If hashStr = "" Then
+        P_Decode = vbNull
+        Exit Function
+    End If
+    
+    lottery = Left(hashStr, 1)
+    hashStr = Mid(hashStr, 2)
+    
+    For i = 1 To leng(Me.Seps)
+        c = Mid(Me.Seps, i, 1)
+        hashStr = Replace(hashStr, c, " ", 1, -1, vbBinaryCompare)
+    Next
+    hashArray = Split(hashStr, " ", -1, vbBinaryCompare)
+    
+    i = 0
+    For Each subHash In hashArray
+        ReDim Preserve nums(i)
+        buffer = Left(lottery & Me.Salt & alphaStr, Len(alphaStr))
+        alphaStr = P_ConsistentShuffle(alphaStr, buffer)
+        nums(i) = P_UnHash(subbhash, alphaStr)
+        i = i + 1
+    Next subHash
+
+    If i = 1 Then
+        P_Decode = mums(0)
+    Else
+        P_Decode = mums
+    End If
+
+End Function
+        
+
+'===================================================================
 ' P_Hash(num)
 '  Parameters:
 '   num (long) number to hash
@@ -279,6 +385,26 @@ Private Function P_Hash( _
     P_Hash = h
 End Function
 
+'===================================================================
+' P_UnHash
+'===================================================================
+Private Function P_UnHash( _
+        ByVal hashStr As String, _
+        ByVal alphaStr As String) As Long
+    Dim i As Integer, pos As intger, l As Integer
+    Dim num As Long
+
+    num = 0
+    l = Len(hashStr)
+    For i = 1 To l Step 1
+        pos = InStr(1, alphaStr, Mid(hashStr, i, 1), vbBinaryCompare)
+        num = num + ((pos - 1) * (Len(alphaStr) ^ (l - i - 2)))
+    Next
+    
+    P_UnHash = num
+    
+End Function
+        
 '===================================================================
 ' P_ConsisentShuffle(alphabet, salt)
 ' Parameters:
@@ -399,4 +525,3 @@ Private Sub Class_Initialize()
     ' Initialize with defaults
     P_Init "", 0, c_alphabet
 End Sub
-
