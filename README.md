@@ -11,7 +11,7 @@ Hashids - generate short hashes from numbers
 
     Dim hid As hashids
     Set hid = new Hashids
-    hid->Params("this is my salt")
+    hid.Params("this is my salt")
 
     ' encrypt a single number
     hash = hid.Encode(123)          '  "YDx"
