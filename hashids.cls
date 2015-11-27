@@ -46,11 +46,13 @@ End Enum
 ' Properties
 '===================================================================
 
+'-------------------------------------------------------------------
 ' Our Version
 Public Property Get Version() As String
     Version = c_version
 End Property
 
+'-------------------------------------------------------------------
 ' MinHashLength
 Public Property Get MinHashLength() As Integer
     MinHashLength = p_minHashLength
@@ -60,6 +62,7 @@ Private Property Let MinHashLength(ByVal l As Integer)
     p_minHashLength = l
 End Property
 
+'-------------------------------------------------------------------
 ' Salt property
 Public Property Get Salt() As String
     Salt = p_salt
@@ -69,6 +72,7 @@ Private Property Let Salt(ByVal s As String)
     p_salt = P_Nz(s, "")
 End Property
 
+'-------------------------------------------------------------------
 ' Seps property
 Public Property Get Seps() As String
     Seps = p_seps
@@ -78,6 +82,7 @@ Private Property Let Seps(ByVal s As String)
     p_seps = s
 End Property
 
+'-------------------------------------------------------------------
 ' Guards Property
 Public Property Get Guards() As String
     Guards = p_guards
@@ -87,6 +92,7 @@ Private Property Let Guards(ByVal g As String)
     p_guards = g
 End Property
 
+'-------------------------------------------------------------------
 ' Alphabet Property
 Public Property Get Alphabet() As String
     Alphabet = p_alphabet
@@ -236,7 +242,7 @@ Public Function Decrypt(hashStr As String) As Variant
 End Function
 
 '===================================================================
-' p_Encode(nums) - Private encode
+' P_Encode(nums) - Private encode
 '  Parameters:
 '   num (long) array of numbers to hash
 ' Returns
@@ -301,6 +307,12 @@ Private Function P_Encode(ByVal nums As Variant) As String
 End Function
 
 '===================================================================
+' P_Decode(hash, alpha) - Private Decode
+'  Parameters:
+'   hash (string) hashid to decode
+'   alpha (string) alphabet to use for decoding
+' Returns
+'  single number or array of numbers
 '===================================================================
 Private Function P_Decode( _
         ByVal hashStr As String, _
@@ -380,7 +392,12 @@ Private Function P_Hash( _
 End Function
 
 '===================================================================
-' P_UnHash
+' P_UnHash(hash, alpha)
+'  Parameters:
+'   hash (string) single value hash string
+'   alpha (string) alphabet to use for decoding
+' Returns
+'  number
 '===================================================================
 Private Function P_UnHash( _
         ByVal hashStr As String, _
