@@ -381,14 +381,15 @@ Private Function P_Hash( _
         ByVal alphaStr As String) As String
         
     Dim h As String
-    Dim l As Integer, p As Integer
+    Dim la As Integer, p As Integer
     h = ""
-    l = Len(alphaStr)
-    While num > 0
+    la = Len(alphaStr)
+    
+    Do
         p = num Mod l
         h = Mid(alphaStr, p + 1, 1) & h
-        num = Int(num / l)
-    Wend
+        num = Int(num / la)
+    Loop While num > 0
     
     P_Hash = h
 End Function
