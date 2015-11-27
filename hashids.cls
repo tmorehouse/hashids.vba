@@ -399,14 +399,15 @@ End Function
 Private Function P_UnHash( _
         ByVal hashStr As String, _
         ByVal alphaStr As String) As Long
-    Dim i As Integer, pos As intger, l As Integer
+    Dim i As Integer, pos As intger, lh As Integer, la As Integer
     Dim num As Long
 
     num = 0
-    l = Len(hashStr)
-    For i = 1 To l Step 1
-        pos = InStr(1, alphaStr, Mid(hashStr, i, 1), vbBinaryCompare)
-        num = num + ((pos - 1) * (Len(alphaStr) ^ (l - i - 2)))
+    lh = Len(hashStr)
+    la = Len(alphaStr)
+    For i = 1 To lh Step 1
+        pos = InStr(1, alphaStr, Mid(hashStr, i, 1), vbBinaryCompare) - 1
+        num = num + (pos * (la ^ (lh - i)))
     Next
     
     P_UnHash = num
@@ -417,7 +418,7 @@ End Function
 ' P_ConsisentShuffle(alphabet, salt)
 ' Parameters:
 '  alphaStr (string) Alphabet to Shuffle
-'  salt (string) Salt to see teh shuffle
+'  salt (string) Salt to see the shuffle
 ' Returns:
 '  alphabet (string)
 '===================================================================
