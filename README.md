@@ -16,11 +16,11 @@ Hashids - generate short hashes from numbers
     number = hid.Decode('YDx');     '  123
 
     ' or a list
-    hash = hid.Encode(1, 2, 3)      ' "eGtrS8"
+    hash = hid.Encode(1, 2, 3)      ' "laHquq"
     numbers = hid.Decode('laHquq')  ' (1, 2, 3)
 
     ' or an Array
-    hash = hid.Encode(Array(1,2,3)) ' "eGtrS8"
+    hash = hid.Encode(Array(1,2,3)) ' "laHquq"
     numbers = hid.Decode('laHquq')  ' (1, 2, 3)
 
 # DESCRIPTION
