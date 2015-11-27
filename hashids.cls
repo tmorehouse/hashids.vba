@@ -65,7 +65,7 @@ Public Property Get Salt() As String
 End Property
 
 Private Property Let Salt(ByVal s As String)
-    p_salt = Nz(s, "")
+    p_salt = P_Nz(s, "")
 End Property
 
 ' Seps property
@@ -104,7 +104,7 @@ Public Sub Params( _
         Optional alphabetStr As Variant = c_alphabet _
     )
     ' Now compute the guars and seps
-    P_Init Nz(saltStr, ""), Nz(minHashLen, 0), Nz(alphabetStr, c_alphabet)
+    P_Init P_Nz(saltStr, ""), P_Nz(minHashLen, 0), P_Nz(alphabetStr, c_alphabet)
 End Sub
 
 
@@ -187,7 +187,7 @@ End Function
 '===================================================================
 Public Function Decode(ByVal hashStr As String) As Variant
     
-    If Nz(hasStr, "") = "" Then
+    If P_Nz(hasStr, "") = "" Then
         Decode = vbNull
     End If
 
@@ -205,7 +205,7 @@ Public Function DecodeHex(ByVal hashStr As String) As Variant
     Dim num As Long, a As Long, b As Long
     Dim hexStr As String
     
-    If Nz(hasStr, "") = "" Then
+    If P_Nz(hasStr, "") = "" Then
         Decode = vbNull
     End If
     
@@ -328,7 +328,7 @@ Private Function P_Decode( _
     If l = 3 Or l = 2 Then
         i = 1
     End If
-    hashStr = Nz(hashArray(LBound(hashArray) + i), "")
+    hashStr = P_Nz(hashArray(LBound(hashArray) + i), "")
     If hashStr = "" Then
         P_Decode = vbNull
         Exit Function
@@ -517,6 +517,22 @@ Private Sub P_Init(saltStr As String, minHashLen As Integer, alphaStr As String)
         Alphabet = Mid(Alphabet, g + 1)
     End If
 End Sub
+
+'===================================================================
+' Private Nz function
+'  to compensate for lackof Nz() in non MS Access apps
+'===================================================================
+Private Function P_Nz(data As Variant, Optional nullValue As Variant)
+  If IsNull(data) Then
+    If isMissing(nullValue) Then
+      Nz = ""
+    Else
+      Nz = nullValue
+    End If
+  Else
+    Nz = data
+  End If
+End Function
 
 '===================================================================
 ' Class Initialization
