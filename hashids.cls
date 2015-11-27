@@ -118,16 +118,21 @@ End Sub
 '===================================================================
 ' obj.Encode(nums)
 '  Parameters:
-'   nums (variant) single number or list of numbers, or a
-'   variant array of numbers
+'   nums (variant) single number, list of numbers, or an array of numbers
 ' Returns
 '  hashid (string)
 '===================================================================
-Public Function Encode(ParamArray nums() As Variant)
+Public Function Encode(ParamArray vars() As Variant)
     Dim ret As String
     Dim i As Integer, j As Integer, l As Integer
-    Dim num As Variant
+    Dim nums As Variant, num As Variant
     
+    If IsArray(vars(0)) Then
+        nums = vars(0)
+    Else
+        nums = vars
+    End If
+  
     i = 0
     For Each num In nums
         If num Mod 1 <> 0 Or num < 0 Then
