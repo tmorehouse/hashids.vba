@@ -523,17 +523,15 @@ End Sub
 '  to compensate for lack of Nz() in non MS Access apps
 '===================================================================
 Private Function P_Nz( _
-    data As Variant, _
-    Optional nullValue As Variant) As Variant
-  If IsNull(data) Then
-    If isMissing(nullValue) Then
-      P_Nz = ""
+        data As Variant, _
+        Optional nullValue As Variant = "") As Variant
+
+    If IsNull(data) Then
+        P_Nz = nullValue
     Else
-      P_Nz = nullValue
+        P_Nz = data
     End If
-  Else
-    P_Nz = data
-  End If
+
 End Function
 
 '===================================================================
