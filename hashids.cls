@@ -46,11 +46,13 @@ End Enum
 ' Properties
 '===================================================================
 
+'-------------------------------------------------------------------
 ' Our Version
 Public Property Get Version() As String
     Version = c_version
 End Property
 
+'-------------------------------------------------------------------
 ' MinHashLength
 Public Property Get MinHashLength() As Integer
     MinHashLength = p_minHashLength
@@ -59,6 +61,8 @@ End Property
 Private Property Let MinHashLength(ByVal l As Integer)
     p_minHashLength = l
 End Property
+
+'-------------------------------------------------------------------
 ' Salt property
 Public Property Get Salt() As String
     Salt = p_salt
@@ -68,6 +72,7 @@ Private Property Let Salt(ByVal s As String)
     p_salt = P_Nz(s, "")
 End Property
 
+'-------------------------------------------------------------------
 ' Seps property
 Public Property Get Seps() As String
     Seps = p_seps
@@ -77,6 +82,7 @@ Private Property Let Seps(ByVal s As String)
     p_seps = s
 End Property
 
+'-------------------------------------------------------------------
 ' Guards Property
 Public Property Get Guards() As String
     Guards = p_guards
@@ -86,6 +92,7 @@ Private Property Let Guards(ByVal g As String)
     p_guards = g
 End Property
 
+'-------------------------------------------------------------------
 ' Alphabet Property
 Public Property Get Alphabet() As String
     Alphabet = p_alphabet
@@ -311,7 +318,9 @@ End Function
 '===================================================================
 Private Function P_Decode( _
         ByVal hashStr As String, _
-        ByVal alphaStr As String) As Variant
+        ByVal alphaStr As String _
+    ) As Variant
+
     Dim nums As Variant, hashArray As Variant
     Dim i As Integer, l As Integer
     Dim lottery As String, subHash As String, buffer As String
@@ -359,7 +368,6 @@ Private Function P_Decode( _
     End If
 
 End Function
-        
 
 '===================================================================
 ' P_Hash(num)
@@ -415,7 +423,8 @@ End Function
 '===================================================================
 Private Function P_ConsistentShuffle( _
         ByVal alphaStr As String, _
-        Optional ByVal saltStr As String = "") As String
+        Optional ByVal saltStr As String = "" _
+    ) As String
         
     Dim tmpa As String, tmpb As String
     Dim n As Integer, i As Integer, j As Integer, v As Integer, p As Integer
@@ -524,7 +533,8 @@ End Sub
 '===================================================================
 Private Function P_Nz( _
         data As Variant, _
-        Optional nullValue As Variant = "") As Variant
+        Optional nullValue As Variant = "" _
+    ) As Variant
 
     If IsNull(data) Then
         P_Nz = nullValue
