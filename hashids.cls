@@ -326,7 +326,7 @@ Private Function P_Decode( _
     Dim lottery As String, subHash As String, buffer As String
     Dim c As String
 
-    For i = 1 To leng(Me.Guards)
+    For i = 1 To Len(Me.Guards)
         c = Mid(Me.Guards, i, 1)
         hashStr = Replace(hashStr, c, " ", 1, -1, vbBinaryCompare)
     Next
@@ -346,7 +346,7 @@ Private Function P_Decode( _
     lottery = Left(hashStr, 1)
     hashStr = Mid(hashStr, 2)
     
-    For i = 1 To leng(Me.Seps)
+    For i = 1 To Len(Me.Seps)
         c = Mid(Me.Seps, i, 1)
         hashStr = Replace(hashStr, c, " ", 1, -1, vbBinaryCompare)
     Next
