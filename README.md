@@ -1,8 +1,6 @@
 # hashids.vba
 Hashids, ported for VBA (http://www.hashids.org)
 
-**Note:** The decoding functions have not been fully tested yet.
-
 # NAME
 
 Hashids - generate short hashes from numbers
@@ -22,11 +20,7 @@ Hashids - generate short hashes from numbers
     numbers = hid.Decode('laHquq')  ' (1, 2, 3)
 
     ' or an Array
-    Dim arr(3) as Variant
-    arr(0) = 1
-    arr(1) = 2
-    arr(2) = 3
-    hash = hid.Encode(arr)          ' "eGtrS8"
+    hash = hid.Encode(Array(1,2,3)) ' "eGtrS8"
     numbers = hid.Decode('laHquq')  ' (1, 2, 3)
 
 # DESCRIPTION
