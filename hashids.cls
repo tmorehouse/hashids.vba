@@ -103,7 +103,7 @@ Public Sub Params( _
         Optional minHashLen As Variant = 0, _
         Optional alphabetStr As Variant = c_alphabet _
     )
-    ' Now compute the guars and seps
+    ' Now compute the guards and seps
     P_Init P_Nz(saltStr, ""), P_Nz(minHashLen, 0), P_Nz(alphabetStr, c_alphabet)
 End Sub
 
@@ -180,18 +180,18 @@ End Function
 '===================================================================
 ' obj.Decode(hashStr)
 ' Params:
-'   hasStr (string)
+'   hashStr (string)
 '   alphaStr (string)
 ' Returns
 '   Decoded number (if only 1 num) or array of numbers
 '===================================================================
 Public Function Decode(ByVal hashStr As String) As Variant
     
-    If P_Nz(hasStr, "") = "" Then
+    If P_Nz(hashStr, "") = "" Then
         Decode = vbNull
     End If
 
-    Decode = P_Decode(hasStr, Me.Alphabet)
+    Decode = P_Decode(hashStr, Me.Alphabet)
     
 End Function
 
@@ -205,7 +205,7 @@ Public Function DecodeHex(ByVal hashStr As String) As Variant
     Dim num As Long, a As Long, b As Long
     Dim hexStr As String
     
-    If P_Nz(hasStr, "") = "" Then
+    If P_Nz(hashStr, "") = "" Then
         Decode = vbNull
     End If
     
@@ -215,7 +215,7 @@ Public Function DecodeHex(ByVal hashStr As String) As Variant
         'VBA only handles 8 hex chars max
         b = Hex(Int(num / 65536))
         a = Hex(num - (b * 65536))
-        hexStr = hextStr & Mid(b, 2) & a
+        hexStr = hexStr & Mid(b, 2) & a
     Next num
     
     DecodeHex = hexStr
@@ -304,7 +304,7 @@ End Function
 '===================================================================
 ' P_Decode
 ' Params:
-'   hasStr (string)
+'   hashStr (string)
 '   alphaStr (string)
 ' Returns
 '   Decoded number (if only 1 num) or array of numbers
@@ -348,14 +348,14 @@ Private Function P_Decode( _
         ReDim Preserve nums(i)
         buffer = Left(lottery & Me.Salt & alphaStr, Len(alphaStr))
         alphaStr = P_ConsistentShuffle(alphaStr, buffer)
-        nums(i) = P_UnHash(subbhash, alphaStr)
+        nums(i) = P_UnHash(subHash, alphaStr)
         i = i + 1
     Next subHash
 
     If i = 1 Then
-        P_Decode = mums(0)
+        P_Decode = nums(0)
     Else
-        P_Decode = mums
+        P_Decode = nums
     End If
 
 End Function
