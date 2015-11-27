@@ -14,7 +14,7 @@ Option Base 0
 '===================================================================
 ' Constants
 '===================================================================
-Private Const c_version = "1.0.0"
+Private Const c_version = "1.0.1"
 Private Const c_sepDiv As Double = 3.5
 Private Const c_guardDiv As Double = 12#
 Private Const c_minAlphaLen As Integer = 16
@@ -46,13 +46,11 @@ End Enum
 ' Properties
 '===================================================================
 
-'-------------------------------------------------------------------
 ' Our Version
 Public Property Get Version() As String
     Version = c_version
 End Property
 
-'-------------------------------------------------------------------
 ' MinHashLength
 Public Property Get MinHashLength() As Integer
     MinHashLength = p_minHashLength
@@ -62,7 +60,6 @@ Private Property Let MinHashLength(ByVal l As Integer)
     p_minHashLength = l
 End Property
 
-'-------------------------------------------------------------------
 ' Salt property
 Public Property Get Salt() As String
     Salt = p_salt
@@ -72,7 +69,6 @@ Private Property Let Salt(ByVal s As String)
     p_salt = P_Nz(s, "")
 End Property
 
-'-------------------------------------------------------------------
 ' Seps property
 Public Property Get Seps() As String
     Seps = p_seps
@@ -82,7 +78,6 @@ Private Property Let Seps(ByVal s As String)
     p_seps = s
 End Property
 
-'-------------------------------------------------------------------
 ' Guards Property
 Public Property Get Guards() As String
     Guards = p_guards
@@ -92,7 +87,6 @@ Private Property Let Guards(ByVal g As String)
     p_guards = g
 End Property
 
-'-------------------------------------------------------------------
 ' Alphabet Property
 Public Property Get Alphabet() As String
     Alphabet = p_alphabet
@@ -186,11 +180,8 @@ End Function
 
 '===================================================================
 ' obj.Decode(hashStr)
-' Params:
-'   hashStr (string)
-'   alphaStr (string)
-' Returns
-'   Decoded number (if only 1 num) or array of numbers
+' Returns:
+'   Long if single number, or arary if multiple
 '===================================================================
 Public Function Decode(ByVal hashStr As String) As Variant
     
@@ -198,8 +189,9 @@ Public Function Decode(ByVal hashStr As String) As Variant
         Decode = vbNull
     End If
 
+
     Decode = P_Decode(hashStr, Me.Alphabet)
-    
+
 End Function
 
 '===================================================================
@@ -309,21 +301,13 @@ Private Function P_Encode(ByVal nums As Variant) As String
 End Function
 
 '===================================================================
-' P_Decode
-' Params:
-'   hashStr (string)
-'   alphaStr (string)
-' Returns
-'   Decoded number (if only 1 num) or array of numbers
 '===================================================================
 Private Function P_Decode( _
         ByVal hashStr As String, _
-        ByVal alphaStr As String _
-    ) As Variant
-
-    Dim nums As Variant, hashArray As Variant
+        ByVal alphaStr As String) As Variant
+    Dim nums() As Variant, hashArray As Variant
     Dim i As Integer, l As Integer
-    Dim lottery As String, subHash As String, buffer As String
+    Dim lottery As String, subHash As Variant, buffer As String
     Dim c As String
 
     For i = 1 To Len(Me.Guards)
@@ -368,6 +352,7 @@ Private Function P_Decode( _
     End If
 
 End Function
+        
 
 '===================================================================
 ' P_Hash(num)
@@ -386,7 +371,7 @@ Private Function P_Hash( _
     la = Len(alphaStr)
     
     Do
-        p = num Mod l
+        p = num Mod la
         h = Mid(alphaStr, p + 1, 1) & h
         num = Int(num / la)
     Loop While num > 0
@@ -400,12 +385,13 @@ End Function
 Private Function P_UnHash( _
         ByVal hashStr As String, _
         ByVal alphaStr As String) As Long
-    Dim i As Integer, pos As intger, lh As Integer, la As Integer
+    Dim i As Integer, pos As Integer, lh As Integer, la As Integer
     Dim num As Long
 
     num = 0
     lh = Len(hashStr)
     la = Len(alphaStr)
+    
     For i = 1 To lh Step 1
         pos = InStr(1, alphaStr, Mid(hashStr, i, 1), vbBinaryCompare) - 1
         num = num + (pos * (la ^ (lh - i)))
@@ -416,17 +402,16 @@ Private Function P_UnHash( _
 End Function
         
 '===================================================================
-' P_ConsisentShuffle(alphabet, salt)
+' consisentShuffle(alphabet, salt)
 ' Parameters:
 '  alphaStr (string) Alphabet to Shuffle
-'  salt (string) Salt to see the shuffle
+'  salt (string) Salt to see teh shuffle
 ' Returns:
 '  alphabet (string)
 '===================================================================
 Private Function P_ConsistentShuffle( _
         ByVal alphaStr As String, _
-        Optional ByVal saltStr As String = "" _
-    ) As String
+        Optional ByVal saltStr As String = "") As String
         
     Dim tmpa As String, tmpb As String
     Dim n As Integer, i As Integer, j As Integer, v As Integer, p As Integer
@@ -531,12 +516,11 @@ End Sub
 
 '===================================================================
 ' Private Nz function
-'  to compensate for lack of Nz() in non MS Access apps
+'  to compensate for lackof Nz() in non MS Access apps
 '===================================================================
 Private Function P_Nz( _
-        data As Variant, _
-        Optional nullValue As Variant = "" _
-    ) As Variant
+        ByVal data As Variant, _
+        Optional nullValue As Variant = "") As Variant
 
     If IsNull(data) Then
         P_Nz = nullValue
