@@ -8,7 +8,7 @@ Hashids - generate short hashes from numbers
 # SYNOPSIS
 
     Sub testHashids()
-        Dim hid As hashids
+        Dim hid As Hashids
         Dim hash As String, number As Long, numbers As Variant, i As Long
     
         Set hid = New Hashids
