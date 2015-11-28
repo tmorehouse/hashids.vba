@@ -122,10 +122,8 @@ End Sub
 ' Returns
 '  hashid (string)
 '===================================================================
-Public Function Encode(ParamArray vars() As Variant)
-    Dim ret As String
-    Dim i As Integer, j As Integer, l As Integer
-    Dim nums As Variant, num As Variant
+Public Function Encode(ParamArray vars() As Variant) As String
+    Dim i As Integer, nums As Variant, num As Variant
     
     If IsArray(vars(0)) Then
         nums = vars(0)
@@ -157,9 +155,8 @@ End Function
 ' Returns
 '  hashid (string)
 '===================================================================
-Public Function EncodeHex(ByVal hexStr As String) As Variant
-    Dim tmpHex As String, c As String
-    Dim i As Integer
+Public Function EncodeHex(ByVal hexStr As String) As String
+    Dim tmpHex As String, c As String, i As Integer
     Dim nums As Variant
 
     For i = 1 To Len(hexStr) Step 1
@@ -212,8 +209,7 @@ End Function
 '===================================================================
 Public Function DecodeHex(ByVal hashStr As String) As Variant
     Dim nums As Variant, num As Variant
-    Dim a As Long, b As Long
-    Dim hexStr As String
+    Dim a As Long, b As Long, hexStr As String
     
     If P_Nz(hashStr, "") = "" Then
         DecodeHex = Null
@@ -370,7 +366,6 @@ Private Function P_Decode( _
     End If
 
 End Function
-        
 
 '===================================================================
 ' P_Hash(num)
