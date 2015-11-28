@@ -100,7 +100,10 @@ value that can be encoded and decoded is `2,147,483,647`
 # CHANGE LOG
 
 ***1.0.1***
+- Implemented decoding
+- Allows array of numbers to be passed to `Encode`
 
+***1.0.0***
 - Initial release
 
 # LICENSE
