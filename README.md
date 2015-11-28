@@ -7,21 +7,41 @@ Hashids - generate short hashes from numbers
 
 # SYNOPSIS
 
-    Dim hid As hashids
-    Set hid = New Hashids
-    hid.Params("this is my salt")
+    Sub testHashids()
+        Dim hid As hashids
+        Dim hash As String, number As Long, numbers As Variant, i As Long
+    
+        Set hid = New Hashids
+        hid.Params("this is my salt")
+    
+        ' encode a single number
+        hash = hid.Encode(123)          
+        Debug.Print "Encode 123:", hash   ' "YDx"
+    
+        number = hid.Decode("YDx")      
+        Debug.Print "Decode YDx:", number ' 123
+    
+        ' or a list
+        hash = hid.Encode(1, 2, 3)        ' "laHquq"
+        Debug.Print "Encode list 1,2,3:", hash
+    
+        numbers = hid.Decode("laHquq")    ' (1, 2, 3)
+        Debug.Print "Decode laHquq:"
+        For i = LBound(numbers) To UBound(numbers)
+            Debug.Print numbers(i)
+        Next i
+    
+        ' or an Array
+        hash = hid.Encode(Array(1,2,3))   ' "laHquq"
+        Debug.Print "Encode list 1,2,3:", hash
 
-    ' encrypt a single number
-    hash = hid.Encode(123)          '  "YDx"
-    number = hid.Decode('YDx');     '  123
-
-    ' or a list
-    hash = hid.Encode(1, 2, 3)      ' "laHquq"
-    numbers = hid.Decode('laHquq')  ' (1, 2, 3)
-
-    ' or an Array
-    hash = hid.Encode(Array(1,2,3)) ' "laHquq"
-    numbers = hid.Decode('laHquq')  ' (1, 2, 3)
+        numbers = hid.Decode("laHquq")    ' (1, 2, 3)
+        Debug.Print "Decode laHquq:"
+        For i = LBound(numbers) To UBound(numbers)
+            Debug.Print numbers(i)
+        Next i
+        
+    End Sub
 
 # DESCRIPTION
 
