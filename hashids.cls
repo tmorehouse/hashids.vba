@@ -157,8 +157,8 @@ End Function
 ' Returns
 '  hashid (string)
 '===================================================================
-Public Function EncodeHex(ByVal hexStr As String)
-    Dim tmpHex As String
+Public Function EncodeHex(ByVal hexStr As String) As Variant
+    Dim tmpHex As String, c As String
     Dim i As Integer
     Dim nums As Variant
 
@@ -211,8 +211,8 @@ End Function
 '   hex String
 '===================================================================
 Public Function DecodeHex(ByVal hashStr As String) As Variant
-    Dim nums As Variant
-    Dim num As Long, a As Long, b As Long
+    Dim nums As Variant, num As Variant
+    Dim a As Long, b As Long
     Dim hexStr As String
     
     If P_Nz(hashStr, "") = "" Then
