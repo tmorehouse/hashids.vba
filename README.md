@@ -38,6 +38,9 @@ hashids.js.
 
 This implementation is also compatible with the v0.3.x hashids.js API.
 
+**WARNING**: Due to limiations with VBA Long Integer sizes, the maximum 
+value that can be encoded and decoded is `2,147,483,647`
+
 # METHODS
 
 - `set hid = New Hashids`
@@ -78,7 +81,7 @@ This implementation is also compatible with the v0.3.x hashids.js API.
 - `number = hid.Decode(hash)`
 
     Decode a hash string into its number (or numbers.)  Returns either a
-    a single number, an array of numbers if it decrypted a set, or vbNull if 
+    a single number, an array of numbers if it decrypted a set, or Null if 
     given bad input. You should use a variable of type Variant for receiving the 
     return value(s).
 
