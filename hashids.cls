@@ -181,7 +181,7 @@ Public Function EncodeHex(ByVal hexStr As String)
     Wend
     
     If i = 0 Then
-        ' empty strig
+        ' empty string
         EncodeHex = ""
     Else
         EncodeHex = P_Encode(nums)
@@ -197,9 +197,9 @@ End Function
 Public Function Decode(ByVal hashStr As String) As Variant
     
     If P_Nz(hashStr, "") = "" Then
-        Decode = vbNull
+        Decode = Null
+        Exit Function
     End If
-
 
     Decode = P_Decode(hashStr, Me.Alphabet)
 
@@ -216,7 +216,8 @@ Public Function DecodeHex(ByVal hashStr As String) As Variant
     Dim hexStr As String
     
     If P_Nz(hashStr, "") = "" Then
-        Decode = vbNull
+        DecodeHex = Null
+        Exit Function
     End If
     
     nums = P_Decode(hashStr, Me.Alphabet)
