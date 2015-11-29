@@ -9,7 +9,8 @@ Hashids - generate short hashes from numbers
 
     Sub testHashids()
         Dim hid As Hashids
-        Dim hash As String, number As Long, numbers As Variant, i As Long
+        Dim hash As String, hexStr As String
+        Dim number As Long, numbers As Variant, i As Long
     
         Set hid = New Hashids
         hid.Params("this is my salt")
@@ -40,6 +41,13 @@ Hashids - generate short hashes from numbers
         For i = LBound(numbers) To UBound(numbers)
             Debug.Print numbers(i)
         Next i
+        
+        ' or a hex string
+        hash = hid.EncodeHex("deadbeef")   ' "kRNrpKlJ"
+        Debug.Print "EncodeHex deadbeef:", hash
+
+        hexStr = hid.DecodeHex("kRNrpKlJ") ' "deadbeef"
+        Debug.Print "Decode kRNrpKlJ:", hexStr
         
     End Sub
 
@@ -119,12 +127,17 @@ value that can be encoded and decoded is `2,147,483,647`
 
 # CHANGE LOG
 
+***1.0.2***
+- Now supports numbers up to the value of `9,007,199,254,740,991`
+- Improved Hex encoding and decoding
+- 
 ***1.0.1***
-- Implemented decoding
+- Implemented decoding routines
 - Allows array of numbers to be passed to `Encode`
 
 ***1.0.0***
 - Initial release
+- Limited to max number value of `2,147,483,647` (signed 32bit integer)
 
 # LICENSE
 
