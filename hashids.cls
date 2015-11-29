@@ -39,7 +39,7 @@ Private p_minHashLength As Integer
 '===================================================================
 ' Error Codes
 '===================================================================
-Public Enum HashidsDecErr
+Public Enum HashidsErr
     hidAlphaShort = vbObjectError + 1000
     hidAlphaSpace = vbObjectError + 1001
     hidNonInteger = vbObjectError + 1002
