@@ -235,10 +235,10 @@ Public Function DecodeHex( _
     nums = P_Decode(hashStr, Me.Alphabet, True)
     hexStr = ""
     For Each num In nums
-         hexStr = hexStr & P_Dec2Hex(num)
+         hexStr = hexStr & Mid(P_Dec2Hex(num),2)
     Next num
     
-    DecodeHex = Mid(hexStr, 2)
+    DecodeHex = hexStr
 
 End Function
 
