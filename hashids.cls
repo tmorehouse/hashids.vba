@@ -10,11 +10,14 @@ Attribute VB_Exposed = False
 Option Explicit
 ' Make sure arrays start at 0
 Option Base 0
-
+'
+' Range of numbers supported: 0 to 9007199254740991
+' Decoded numbers are returned a Decimal (stored in variant)
+'
 '===================================================================
 ' Constants
 '===================================================================
-Private Const c_version = "1.0.1"
+Private Const c_version = "1.0.2"
 Private Const c_sepDiv As Double = 3.5
 Private Const c_guardDiv As Double = 12#
 Private Const c_minAlphaLen As Integer = 16
@@ -36,7 +39,7 @@ Private p_minHashLength As Integer
 '===================================================================
 ' Error Codes
 '===================================================================
-Public Enum HashidsErr
+Public Enum HashidsDecErr
     hidAlphaShort = vbObjectError + 1000
     hidAlphaSpace = vbObjectError + 1001
     hidNonInteger = vbObjectError + 1002
@@ -103,7 +106,7 @@ Private Property Let Alphabet(ByVal alpha As String)
 End Property
 
 '===================================================================
-' Allow initialization with optional salt. min hash len and alphabet
+' Allow initialization with optional salt, minhashlen and alphabet
 '===================================================================
 Public Sub Params( _
         Optional saltStr As Variant = "", _
@@ -118,22 +121,27 @@ End Sub
 '===================================================================
 ' obj.Encode(nums)
 '  Parameters:
-'   nums (variant) single number, list of numbers, or an array of numbers
+'   nums (variant) single number or list of numbers, or a
+'   variant array of numbers
 ' Returns
 '  hashid (string)
 '===================================================================
 Public Function Encode(ParamArray vars() As Variant) As String
-    Dim i As Integer, nums As Variant, num As Variant
+    Dim ret As String
+    Dim i As Integer, j As Integer, l As Integer
+    Dim num As Variant, nums As Variant, tmpNum As Variant
     
+    ' Handle passing of an array
     If IsArray(vars(0)) Then
         nums = vars(0)
     Else
         nums = vars
     End If
-  
+    
     i = 0
     For Each num In nums
-        If num Mod 1 <> 0 Or num < 0 Then
+        tmpNum = CDec(num)
+        If tmpNum <> Int(tmpNum / CDec(1)) Or tmpNum < CDec(0) Then
             Err.Raise hidNonInteger, "Hashids", "Non positive/integer value in Encode list"
         End If
         i = i + 1
@@ -155,30 +163,32 @@ End Function
 ' Returns
 '  hashid (string)
 '===================================================================
-Public Function EncodeHex(ByVal hexStr As String) As String
-    Dim tmpHex As String, c As String, i As Integer
-    Dim nums As Variant
+Public Function EncodeHex(ByVal hexStr As Variant) As String
+    Dim i As Integer, nums() As Variant, tmp As String
 
+    hexStr = CStr(hexStr)
+    
+    ' Ensure only hex characters
     For i = 1 To Len(hexStr) Step 1
-        c = Mid(hexStr, i, 1)
         If InStr(1, c_hex, Mid(hexStr, i, 1), vbBinaryCompare) < 1 Then
             EncodeHex = ""
             Exit Function
         End If
     Next
         
+    ' Break the input string into groups of 12 hex chars max
+    ' and convert to decimal
     i = 0
     While Len(hexStr) > 0
         ReDim Preserve nums(i)
-        'VBA only handles 8 hex chars max, so we break it into two parts
-        tmpHex = Left("00000000000" & Left(hexStr, 11), 11)
-        nums(i) = (CLng("&H" & Left(tmpHex, 7)) * 65536) + CLng("&H" & Right(tmpHex, 4))
-        hexStr = Mid(hexStr, 12)
+        nums(i) = P_Hex2Dec("1" & Left(CStr(hexStr), 12))
+        hexStr = Mid(hexStr, 13)
         i = i + 1
     Wend
     
+    ' Encode the numbers
     If i = 0 Then
-        ' empty string
+        ' empty strig
         EncodeHex = ""
     Else
         EncodeHex = P_Encode(nums)
@@ -189,16 +199,19 @@ End Function
 '===================================================================
 ' obj.Decode(hashStr)
 ' Returns:
-'   Long if single number, or arary if multiple
+'   Decimal(variant) if single number, or arary if multiple
 '===================================================================
-Public Function Decode(ByVal hashStr As String) As Variant
+Public Function Decode( _
+        ByVal hashStr As String, _
+        Optional forceArray As Boolean = False _
+    ) As Variant
     
     If P_Nz(hashStr, "") = "" Then
         Decode = Null
         Exit Function
     End If
-
-    Decode = P_Decode(hashStr, Me.Alphabet)
+    
+    Decode = P_Decode(hashStr, Me.Alphabet, forceArray)
 
 End Function
 
@@ -207,55 +220,66 @@ End Function
 ' Returns:
 '   hex String
 '===================================================================
-Public Function DecodeHex(ByVal hashStr As String) As Variant
-    Dim nums As Variant, num As Variant
-    Dim a As Long, b As Long, hexStr As String
+Public Function DecodeHex( _
+        ByVal hashStr As String _
+    ) As Variant
+    
+    Dim nums As Variant, num As Variant, a As Long, b As Long
+    Dim hexStr As String
     
     If P_Nz(hashStr, "") = "" Then
         DecodeHex = Null
         Exit Function
     End If
     
-    nums = P_Decode(hashStr, Me.Alphabet)
+    nums = P_Decode(hashStr, Me.Alphabet, True)
     hexStr = ""
     For Each num In nums
-        'VBA only handles 8 hex chars max
-        b = Hex(Int(num / 65536))
-        a = Hex(num - (b * 65536))
-        hexStr = hexStr & Mid(b, 2) & a
+         hexStr = hexStr & P_Dec2Hex(num)
     Next num
     
-    DecodeHex = hexStr
+    DecodeHex = Mid(hexStr, 2)
 
 End Function
 
 '===================================================================
 ' obj.Encrypt  Alias of Encode
 '===================================================================
-Public Function Encrypt(ParamArray nums() As Variant) As String
+Public Function Encrypt( _
+        ParamArray nums() As Variant _
+    ) As String
+    
     Encrypt = Encode(nums)
+    
 End Function
 
 '===================================================================
 ' obj.Decrypt  Alias of Decode
 '===================================================================
-Public Function Decrypt(hashStr As String) As Variant
+Public Function Decrypt( _
+        hashStr As String, _
+        Optional forceArray As Boolean = False _
+    ) As Variant
+    
     Decrypt = Decode(hashStr)
+    
 End Function
 
 '===================================================================
-' P_Encode(nums) - Private encode
+' p_Encode(nums) - Private encode
 '  Parameters:
 '   num (long) array of numbers to hash
 ' Returns
 '  hash (string) hash string
 '===================================================================
 Private Function P_Encode(ByVal nums As Variant) As String
+
     Dim lottery As String, buffer As String, alpha As String
     Dim ret As String, guard As String, lst As String
     Dim num As Variant
     Dim i As Integer, sepsIdx As Integer, guardIdx As Integer
-    Dim half As Integer, excess As Integer, numSize As Integer, numHashInt As Integer
+    Dim half As Integer, excess As Integer, numSize As Integer
+    Dim numHashInt As Integer
   
     alpha = Me.Alphabet
     numSize = UBound(nums) - LBound(nums) + 1
@@ -263,7 +287,7 @@ Private Function P_Encode(ByVal nums As Variant) As String
     
     i = 0
     For Each num In nums
-        numHashInt = numHashInt + (num Mod (i + 100))
+        numHashInt = numHashInt + CInt(P_Mod(num, i + 100))
         i = i + 1
     Next num
     
@@ -277,8 +301,8 @@ Private Function P_Encode(ByVal nums As Variant) As String
         lst = P_Hash(num, alpha)
         ret = ret & lst
         If (i + 1) < numSize Then
-            num = num Mod (Asc(lst) + i)
-            sepsIdx = num Mod Len(Me.Seps)
+            num = P_Mod(num, Asc(lst) + i)
+            sepsIdx = CInt(P_Mod(num, Len(Me.Seps)))
             ret = ret & Mid(Me.Seps, sepsIdx + 1, 1)
         End If
         i = i + 1
@@ -301,7 +325,7 @@ Private Function P_Encode(ByVal nums As Variant) As String
         ret = Mid(alpha, half + 1) & ret & Mid(alpha, 1, half)
         excess = Len(ret) - Me.MinHashLength
         If excess > 0 Then
-            ret = Mid(ret, Int(excess / 2) + 1, Me.MinHashLength)
+            ret = Mid(ret, (excess \ 2) + 1, Me.MinHashLength)
         End If
     Wend
     
@@ -318,18 +342,21 @@ End Function
 '===================================================================
 Private Function P_Decode( _
         ByVal hashStr As String, _
-        ByVal alphaStr As String) As Variant
+        ByVal alphaStr As String, _
+        Optional forceArray As Boolean = False _
+    ) As Variant
+    
     Dim nums() As Variant, hashArray As Variant
     Dim i As Integer, l As Integer
     Dim lottery As String, subHash As Variant, buffer As String
     Dim c As String
 
+    ' Strip out guards
     For i = 1 To Len(Me.Guards)
         c = Mid(Me.Guards, i, 1)
         hashStr = Replace(hashStr, c, " ", 1, -1, vbBinaryCompare)
     Next
     hashArray = Split(hashStr, " ", -1, vbBinaryCompare)
-    
     i = 0
     l = UBound(hashArray) - LBound(hashArray) + 1
     If l = 3 Or l = 2 Then
@@ -337,19 +364,21 @@ Private Function P_Decode( _
     End If
     hashStr = P_Nz(hashArray(LBound(hashArray) + i), "")
     If hashStr = "" Then
-        P_Decode = vbNull
+        P_Decode = Null
         Exit Function
     End If
     
     lottery = Left(hashStr, 1)
     hashStr = Mid(hashStr, 2)
     
+    ' Break into array of number hashes
     For i = 1 To Len(Me.Seps)
         c = Mid(Me.Seps, i, 1)
         hashStr = Replace(hashStr, c, " ", 1, -1, vbBinaryCompare)
     Next
     hashArray = Split(hashStr, " ", -1, vbBinaryCompare)
     
+    ' Decode each number in the hash array
     i = 0
     For Each subHash In hashArray
         ReDim Preserve nums(i)
@@ -359,13 +388,14 @@ Private Function P_Decode( _
         i = i + 1
     Next subHash
 
-    If i = 1 Then
+    If i = 1 And Not forceArray Then
         P_Decode = nums(0)
     Else
         P_Decode = nums
     End If
 
 End Function
+        
 
 '===================================================================
 ' P_Hash(num)
@@ -375,21 +405,25 @@ End Function
 '  hash (string) hash string
 '===================================================================
 Private Function P_Hash( _
-        ByVal num As Long, _
-        ByVal alphaStr As String) As String
+        ByVal num As Variant, _
+        ByVal alphaStr As String _
+    ) As String
         
-    Dim h As String
-    Dim la As Integer, p As Integer
-    h = ""
-    la = Len(alphaStr)
+    Dim hash As String
+    Dim la As Integer, pos As Integer
+    
+    num = CDec(num)
+    hash = ""
+    la = CDec(Len(alphaStr))
     
     Do
-        p = num Mod la
-        h = Mid(alphaStr, p + 1, 1) & h
-        num = Int(num / la)
-    Loop While num > 0
+        pos = CInt(P_Mod(num, la))
+        hash = Mid(alphaStr, pos + 1, 1) & hash
+        num = CDec(Int(num / la))
+    Loop While CDec(num) > CDec(0)
     
-    P_Hash = h
+    P_Hash = hash
+    
 End Function
 
 '===================================================================
@@ -402,17 +436,19 @@ End Function
 '===================================================================
 Private Function P_UnHash( _
         ByVal hashStr As String, _
-        ByVal alphaStr As String) As Long
+        ByVal alphaStr As String _
+    ) As Variant
+    
     Dim i As Integer, pos As Integer, lh As Integer, la As Integer
-    Dim num As Long
+    Dim num As Variant
 
-    num = 0
-    lh = Len(hashStr)
-    la = Len(alphaStr)
+    num = CDec(0)
+    lh = CDec(Len(hashStr))
+    la = CDec(Len(alphaStr))
     
     For i = 1 To lh Step 1
-        pos = InStr(1, alphaStr, Mid(hashStr, i, 1), vbBinaryCompare) - 1
-        num = num + (pos * (la ^ (lh - i)))
+        pos = CDec(InStr(1, alphaStr, Mid(hashStr, i, 1), vbBinaryCompare) - 1)
+        num = num + (CDec(pos) * (la ^ (lh - CDec(i))))
     Next
     
     P_UnHash = num
@@ -467,6 +503,83 @@ Private Function P_Ceil(ByVal num As Double) As Double
 End Function
 
 '===================================================================
+' Private Nz function
+'  to compensate for lackof Nz() in non MS Access apps
+'===================================================================
+Private Function P_Nz( _
+        ByVal data As Variant, _
+        Optional nullValue As Variant = "") As Variant
+
+    If IsNull(data) Or IsEmpty(data) Then
+        P_Nz = nullValue
+    Else
+        P_Nz = data
+    End If
+
+End Function
+
+'===================================================================
+' Private MOD function
+'  to compensate for VBAs MOD function not working with large values
+'===================================================================
+Private Function P_Mod( _
+        ByVal number As Variant, _
+        ByVal divisor As Variant _
+    ) As Variant
+
+    number = CDec(number)
+    divisor = CDec(divisor)
+    
+    P_Mod = number - (divisor * Int(number / divisor))
+
+End Function
+
+'===================================================================
+' Private Dec2Hex function
+'  to compensate for VBAs limit of 8 characters max
+'===================================================================
+Private Function P_Dec2Hex( _
+        ByVal number As Variant _
+    ) As String
+
+    Dim hexStr As String
+    
+    number = CDec(number)
+    hexStr = ""
+    
+    While number > CDec(0)
+        hexStr = Hex(P_Mod(number, 16)) & hexStr
+        number = CDec(Int(number / CDec(16)))
+    Wend
+
+    P_Dec2Hex = LCase(hexStr)
+    
+End Function
+
+'===================================================================
+' Private HEX2DEC function
+'  to compensate for VBAs limited hex handling
+'===================================================================
+Private Function P_Hex2Dec( _
+        ByVal hexStr As Variant _
+    ) As Variant
+    
+    Dim number As Variant
+
+    number = CDec(0)
+    hexStr = CStr(hexStr)
+    
+    While Len(hexStr) > 0
+        number = (number * CDec(16)) + CDec("&h" & Left(hexStr, 1))
+        hexStr = Mid(hexStr, 2)
+    Wend
+
+    P_Hex2Dec = CDec(number)
+    
+End Function
+
+
+'===================================================================
 ' Private Initialization routine to compute seps, guards, alphabet
 '===================================================================
 Private Sub P_Init(saltStr As String, minHashLen As Integer, alphaStr As String)
@@ -496,7 +609,7 @@ Private Sub P_Init(saltStr As String, minHashLen As Integer, alphaStr As String)
         Err.Raise hidAlphaShort, "Hashids", "Alphabet must contain at least " & c_minAlphaLen & " unique characters"
     End If
     
-    ' Seps must be from alphabet and alphabet cant contain seps
+    ' Seps must be from alphabet and alphabet cannot contain seps
     Seps = ""
     For i = 1 To Len(c_seps) Step 1
         c = Mid(c_seps, i, 1)
@@ -531,22 +644,6 @@ Private Sub P_Init(saltStr As String, minHashLen As Integer, alphaStr As String)
         Alphabet = Mid(Alphabet, g + 1)
     End If
 End Sub
-
-'===================================================================
-' Private Nz function
-'  to compensate for lackof Nz() in non MS Access apps
-'===================================================================
-Private Function P_Nz( _
-        ByVal data As Variant, _
-        Optional nullValue As Variant = "") As Variant
-
-    If IsNull(data) Then
-        P_Nz = nullValue
-    Else
-        P_Nz = data
-    End If
-
-End Function
 
 '===================================================================
 ' Class Initialization
