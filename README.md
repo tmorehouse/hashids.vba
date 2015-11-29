@@ -130,7 +130,7 @@ value that can be encoded and decoded is `2,147,483,647`
 ***1.0.2***
 - Now supports numbers up to the value of `9,007,199,254,740,991`
 - Improved Hex encoding and decoding
-- 
+
 ***1.0.1***
 - Implemented decoding routines
 - Allows array of numbers to be passed to `Encode`
