@@ -66,9 +66,6 @@ hashids.js.
 
 This implementation is also compatible with the v0.3.x hashids.js API.
 
-**WARNING**: Due to limiations with VBA Long Integer sizes, the maximum 
-value that can be encoded and decoded is `2,147,483,647`
-
 # METHODS
 
 - `set hid = New Hashids`
