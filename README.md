@@ -109,6 +109,11 @@ This implementation is also compatible with the v0.3.x hashids.js API.
     a single number, an array of numbers if it decrypted a set, or Null if 
     given bad input. You should use a variable of type Variant for receiving the 
     return value(s).
+    
+    An optional 2nd boolean parameter can be passed to `Decode` to force the value(s) to 
+    always be returned as an array, even when there is only one number in the encoded set:
+    
+    `numbers = hid.Decode(hash,True)`
 
     _decrypt()_ is an alias for this method, for compatibility with v0.3.x
     hashids.js API.
